@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSP診断｜あなたの感受性を知る</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --paper: #f5f0e8;
+    --cream: #ede6d6;
+    --accent: #7c5c3a;
+    --accent2: #b08a5e;
+    --muted: #8a7f72;
+    --soft: #d4c9b5;
+    --border: #c8bba8;
+    --aes: #5a7a6a;
+    --low: #7a5a6a;
+    --exc: #5a5a7a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Serif JP', serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* 和紙テクスチャ風背景 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; }
+
+  /* ===== COVER ===== */
+  #cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    text-align: center;
+  }
+
+  .cover-deco {
+    width: 2px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--accent));
+    margin: 0 auto 32px;
+    animation: grow 1.2s ease forwards;
+  }
+  @keyframes grow { from { height: 0; opacity: 0; } to { height: 80px; opacity: 1; } }
+
+  .cover-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 16px;
+    animation: fadeUp 0.8s 0.5s ease both;
+  }
+
+  h1 span {
+    display: block;
+    font-size: 0.48em;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-top: 8px;
+  }
+
+  .cover-desc {
+    max-width: 520px;
+    font-size: 0.93rem;
+    line-height: 1.9;
+    color: var(--muted);
+    margin: 24px auto 40px;
+    animation: fadeUp 0.8s 0.7s ease both;
+  }
+
+  .cover-stats {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin-bottom: 48px;
+    animation: fadeUp 0.8s 0.9s ease both;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+  .btn-start {
+    display: inline-block;
+    padding: 16px 56px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    animation: fadeUp 0.8s 1.1s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-start::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .btn-start:hover::after { transform: translateX(0); }
+  .btn-start span { position: relative; z-index: 1; }
+
+  .cover-note {
+    margin-top: 32px;
+    font-size: 0.75rem;
+    color: var(--soft);
+    animation: fadeUp 0.8s 1.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== QUIZ ===== */
+  #quiz { display: none; padding: 40px 24px 80px; max-width: 760px; margin: 0 auto; }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 2px; }
+  .progress-count { font-size: 0.75rem; color: var(--accent); }
+
+  .progress-track {
+    width: 100%;
+    height: 3px;
+    background: var(--soft);
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .question-card {
+    animation: fadeUp 0.4s ease both;
+    margin-bottom: 32px;
+  }
+
+  .q-factor-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin-bottom: 16px;
+    border-radius: 0;
+  }
+
+  .q-num {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.75rem;
+    color: var(--accent2);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .q-text {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .scale-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .scale-btn {
+    width: 52px;
+    height: 52px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    color: var(--muted);
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .scale-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--cream);
+  }
+
+  .scale-btn.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+    margin: 40px auto;
+  }
+
+  .nav-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  .btn-nav {
+    padding: 12px 32px;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    color: var(--ink);
+  }
+
+  .btn-nav:hover { background: var(--ink); color: var(--paper); }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-nav:disabled:hover { background: transparent; color: var(--ink); }
+
+  .btn-nav.primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-nav.primary:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ===== RESULT ===== */
+  #result { display: none; padding: 60px 24px 80px; max-width: 760px; margin: 0 auto; }
+
+  .result-deco {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .result-deco-line { flex: 1; height: 1px; background: var(--border); }
+  .result-deco-text { font-size: 10px; letter-spacing: 4px; color: var(--muted); }
+
+  .result-type {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .result-type-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .result-type-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 16px;
+  }
+
+  .result-total-score {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .result-total-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  .result-desc {
+    max-width: 580px;
+    margin: 0 auto 48px;
+    font-size: 0.9rem;
+    line-height: 1.95;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* 3因子バー */
+  .factors-section { margin-bottom: 48px; }
+  .factors-title {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .factor-item { margin-bottom: 24px; }
+  .factor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .factor-name { font-size: 0.85rem; color: var(--ink); font-weight: 600; }
+  .factor-score { font-family: 'Shippori Mincho', serif; font-size: 1rem; color: var(--accent); }
+  .factor-desc-small { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; }
+
+  .factor-track {
+    width: 100%;
+    height: 6px;
+    background: var(--soft);
+    position: relative;
+  }
+  .factor-fill {
+    height: 100%;
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .factor-fill.f1 { background: var(--low); }
+  .factor-fill.f2 { background: var(--exc); }
+  .factor-fill.f3 { background: var(--aes); }
+
+  /* 結果テキスト */
+  .result-insight {
+    background: var(--cream);
+    border-left: 3px solid var(--accent);
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+  .result-insight h3 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .result-insight p {
+    font-size: 0.86rem;
+    line-height: 1.9;
+    color: var(--muted);
+  }
+
+  /* フォームリンク */
+  .form-section {
+    border: 1.5px solid var(--border);
+    padding: 36px 32px;
+    text-align: center;
+    margin-bottom: 40px;
+    background: rgba(255,255,255,0.3);
+  }
+  .form-section h3 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .form-section p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.8;
+  }
+
+  .btn-form {
+    display: inline-block;
+    padding: 14px 44px;
+    background: var(--aes);
+    color: #fff;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 12px;
+  }
+  .btn-form:hover { opacity: 0.85; }
+
+  .btn-retry {
+    display: block;
+    margin: 32px auto 0;
+    padding: 12px 40px;
+    background: transparent;
+    border: 1.5px solid var(--ink);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .btn-retry:hover { background: var(--ink); color: var(--paper); }
+
+  /* フッター */
+  footer {
+    text-align: center;
+    padding: 32px 24px;
+    font-size: 0.7rem;
+    color: var(--soft);
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* モバイル */
+  @media (max-width: 600px) {
+    .scale-btn { width: 42px; height: 42px; font-size: 0.9rem; }
+    .cover-stats { gap: 24px; }
+    .form-section { padding: 24px 20px; }
+  }
+
+  .form-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    border-radius: 0;
+    min-height: 110px;
+    resize: vertical;
+    display: block;
+  }
+  .form-textarea:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===== カバー ===== -->
+<section id="cover">
+  <div class="cover-deco"></div>
+  <div class="cover-label">Psychological Self-Assessment</div>
+  <h1>
+    HSP 感受性診断
+    <span>Highly Sensitive Person Scale</span>
+    <span style="font-size:0.35em;color:var(--muted);letter-spacing:0.08em;margin-top:6px;font-weight:400;">HSPS-J19（日本版スケール）</span>
+  </h1>
+  <p class="cover-desc">
+    あなたの「感じる力」を測る心理尺度です。<br>
+    全人口の約15〜20%が持つとされるHSP特性——<br>
+    あなたの内側にある繊細さと豊かさを、科学的な視点で探ります。
+  </p>
+  <div class="cover-stats">
+    <div class="stat">
+      <div class="stat-num">19</div>
+      <div class="stat-label">質問項目</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">測定因子</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5分</div>
+      <div class="stat-label">所要時間</div>
+    </div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()"><span>診断をはじめる</span></button>
+  <p class="cover-note">
+    本診断は髙橋（2016）のHSPS-J19に基づく心理尺度です。<br>
+    医療診断ではありません。自己理解の参考としてご活用ください。
+  </p>
+</section>
+
+<!-- ===== クイズ ===== -->
+<section id="quiz">
+  <div class="progress-header">
+    <div class="progress-label">QUESTION</div>
+    <div class="progress-count" id="progressCount">1 / 19</div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div id="questionArea"></div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" id="btnPrev" onclick="prevQ()" disabled>← 前へ</button>
+    <button class="btn-nav primary" id="btnNext" onclick="nextQ()">次へ →</button>
+  </div>
+</section>
+
+<!-- ===== 結果 ===== -->
+<section id="result">
+  <div class="result-deco">
+    <div class="result-deco-line"></div>
+    <div class="result-deco-text">YOUR RESULT</div>
+    <div class="result-deco-line"></div>
+  </div>
+
+  <div class="result-type">
+    <div class="result-type-label">あなたのタイプ</div>
+    <div class="result-type-name" id="resultTypeName">—</div>
+    <div class="result-total-score" id="resultTotalScore">—</div>
+    <div class="result-total-sub">総合スコア（133点満点）</div>
+  </div>
+
+  <p class="result-desc" id="resultDesc">—</p>
+
+  <div class="factors-section">
+    <div class="factors-title">3つの感受性因子</div>
+
+    <div class="factor-item">
+      <div class="factor-header">
+        <div class="factor-name">① 低感覚閾</div>
+        <div class="factor-score" id="score-f1">—</div>
+      </div>
+      <div class="factor-desc-small">感覚刺激の強さに対する敏感さ（騒音・光・匂いなど）</div>
+      <div class="factor-track"><div class="factor-fill f1" id="bar-f1"></div></div>
+    </div>
+
+    <div class="factor-item">
+      <div class="factor-header">
+        <div class="factor-name">② 易興奮性</div>
+        <div class="factor-score" id="score-f2">—</div>
+      </div>
+      <div class="factor-desc-small">刺激への情動的な反応のしやすさ</div>
+      <div class="factor-track"><div class="factor-fill f2" id="bar-f2"></div></div>
+    </div>
+
+    <div class="factor-item">
+      <div class="factor-header">
+        <div class="factor-name">③ 美的感受性</div>
+        <div class="factor-score" id="score-f3">—</div>
+      </div>
+      <div class="factor-desc-small">芸術・音楽・自然への深い感動と内面世界の豊かさ</div>
+      <div class="factor-track"><div class="factor-fill f3" id="bar-f3"></div></div>
+    </div>
+  </div>
+
+  <div class="result-insight" id="resultInsight">
+    <h3>あなたへのメッセージ</h3>
+    <p id="resultInsightText">—</p>
+  </div>
+
+  <div class="form-section" id="inlineForm">
+    <h3>感想を教えてください</h3>
+    <p>任意です。いただいた感想はサービス改善に活用します。</p>
+    <textarea class="form-textarea" id="f-comment" placeholder="診断を受けてみての感想、気づきなど..."></textarea>
+    <button class="btn-form" onclick="submitInlineForm()" style="margin-top:16px;display:block;width:100%;text-align:center;">送信する</button>
+    <p style="font-size:0.72rem;color:var(--soft);margin-top:10px;">
+      ※ GoogleフォームのURLを設定することで実際にデータを収集できます。
+    </p>
+  </div>
+
+  <div class="form-submitted" id="inlineSubmitted" style="display:none;text-align:center;padding:32px 0 16px;">
+    <span style="font-size:2.5rem;display:block;margin-bottom:12px;">✦</span>
+    <p style="font-family:'Shippori Mincho',serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px;">ありがとうございました</p>
+    <p style="font-size:0.82rem;color:var(--muted);">ご協力に感謝します。</p>
+  </div>
+
+  <button class="btn-retry" onclick="retryQuiz()">もう一度診断する</button>
+</section>
+
+<footer>
+  HSP診断 | HSPS-J19（髙橋，2016）に基づく | 医療診断ではありません
+</footer>
+
+</div><!-- /wrap -->
+
+
+
+<script>
+// ===== HSPS-J19 質問データ =====
+// factor: 1=低感覚閾, 2=易興奮性, 3=美的感受性
+const questions = [
+  // 第1因子：低感覚閾（7項目）
+  { id: 25, factor: 1, text: '大きな音や雑然とした光景のような強い刺激がわずらわしいですか？' },
+  { id: 9,  factor: 1, text: '大きな音で不快になりますか？' },
+  { id: 23, factor: 1, text: '一度にたくさんのことが起こっていると不快になりますか？' },
+  { id: 19, factor: 1, text: 'いろいろなことが自分の周りで起きていると、不快な気分が高まりますか？' },
+  { id: 7,  factor: 1, text: '明るい光や強いにおい、ごわごわした布地、近くのサイレンの音などにゾッとしやすいですか？' },
+  { id: 5,  factor: 1, text: '忙しい日々が続くと、ベッドや暗くした部屋などプライバシーが得られ、刺激の少ない場所に逃げ込みたくなりますか？' },
+  { id: 16, factor: 1, text: '一度にたくさんのことを頼まれるとイライラしますか？' },
+  // 第2因子：易興奮性（8項目）
+  { id: 14, factor: 2, text: '短時間にしなければならないことが多いとオロオロしますか？' },
+  { id: 3,  factor: 2, text: '他人の気分に左右されますか？' },
+  { id: 13, factor: 2, text: 'ビクッとしやすいですか？' },
+  { id: 26, factor: 2, text: '競争場面や見られていると、緊張や動揺のあまり、いつもの力を発揮できなくなりますか？' },
+  { id: 1,  factor: 2, text: '強い刺激に圧倒されやすいですか？' },
+  { id: 4,  factor: 2, text: '痛みに敏感になることがありますか？' },
+  { id: 27, factor: 2, text: '子供の頃、親や教師はあなたのことを「敏感だ」とか「内気だ」と見ていましたか？' },
+  { id: 21, factor: 2, text: '生活に変化があると混乱しますか？' },
+  // 第3因子：美的感受性（4項目）
+  { id: 22, factor: 3, text: '微細で繊細な香り・味・音・芸術作品などを好みますか？' },
+  { id: 12, factor: 3, text: '自分に対して誠実ですか？' },
+  { id: 10, factor: 3, text: '芸術や音楽に深く感動しますか？' },
+  { id: 8,  factor: 3, text: '豊かな内面生活を送っていますか？' },
+];
+
+const factorLabels = ['', '低感覚閾', '易興奮性', '美的感受性'];
+const scaleLabels = ['全くない', '少しある', 'まあある', 'かなりある', 'とてもある'];
+
+let answers = new Array(19).fill(null);
+let currentQ = 0;
+
+function startQuiz() {
+  document.getElementById('cover').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const total = questions.length;
+
+  // プログレス更新
+  document.getElementById('progressCount').textContent = `${currentQ + 1} / ${total}`;
+  document.getElementById('progressBar').style.width = `${((currentQ + 1) / total) * 100}%`;
+
+  const factorColors = { 1: '#7a5a6a', 2: '#5a5a7a', 3: '#5a7a6a' };
+  const factorNames = { 1: '低感覚閾', 2: '易興奮性', 3: '美的感受性' };
+
+  const area = document.getElementById('questionArea');
+  area.innerHTML = `
+    <div class="question-card">
+      <div class="q-factor-tag" style="border-color:${factorColors[q.factor]};color:${factorColors[q.factor]}">
+        ${factorNames[q.factor]}
+      </div>
+      <div class="q-num">Q ${String(currentQ + 1).padStart(2, '0')}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="scale-labels">
+        <span>全くない</span>
+        <span>とてもある</span>
+      </div>
+      <div class="scale-btns">
+        ${[1,2,3,4,5,6,7].map(v => `
+          <button class="scale-btn ${answers[currentQ] === v ? 'selected' : ''}"
+            onclick="selectAnswer(${v})">${v}</button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btnPrev').disabled = currentQ === 0;
+
+  const btnNext = document.getElementById('btnNext');
+  if (currentQ === total - 1) {
+    btnNext.textContent = '結果を見る ✦';
+  } else {
+    btnNext.textContent = '次へ →';
+  }
+}
+
+function selectAnswer(val) {
+  answers[currentQ] = val;
+  // ボタン更新
+  document.querySelectorAll('.scale-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i + 1 === val);
+  });
+  // 自動次ページ（最後以外）
+  if (currentQ < questions.length - 1) {
+    setTimeout(() => nextQ(), 350);
+  }
+}
+
+function nextQ() {
+  if (answers[currentQ] === null) {
+    // 未回答アラート（シンプルに）
+    document.querySelectorAll('.scale-btn').forEach(btn => {
+      btn.style.borderColor = '#b08a5e';
+    });
+    setTimeout(() => {
+      document.querySelectorAll('.scale-btn').forEach(btn => {
+        btn.style.borderColor = '';
+      });
+    }, 600);
+    return;
+  }
+  if (currentQ === questions.length - 1) {
+    showResult();
+    return;
+  }
+  currentQ++;
+  renderQuestion();
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+  }
+}
+
+// ===== 結果計算 =====
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  // 因子別スコア
+  let f1 = 0, f2 = 0, f3 = 0;
+  let f1max = 0, f2max = 0, f3max = 0;
+
+  questions.forEach((q, i) => {
+    const v = answers[i] || 0;
+    if (q.factor === 1) { f1 += v; f1max += 7; }
+    if (q.factor === 2) { f2 += v; f2max += 7; }
+    if (q.factor === 3) { f3 += v; f3max += 7; }
+  });
+
+  const total = f1 + f2 + f3;
+  const totalMax = f1max + f2max + f3max; // 133
+
+  const pct1 = Math.round((f1 / f1max) * 100);
+  const pct2 = Math.round((f2 / f2max) * 100);
+  const pct3 = Math.round((f3 / f3max) * 100);
+
+  // タイプ判定
+  const totalPct = Math.round((total / totalMax) * 100);
+  let typeName, typeDesc, insightText;
+
+  const highAES = pct3 >= 57; // 美的感受性が高い
+  const highLST = pct1 >= 57; // 低感覚閾が高い
+  const highEXC = pct2 >= 57; // 易興奮性が高い
+
+  if (totalPct >= 70) {
+    if (highAES && !highLST && !highEXC) {
+      typeName = '美的HSP型';
+      typeDesc = 'HSPの中でも特に「美的感受性」が際立っています。芸術や音楽に深く感動し、豊かな内面世界を持つ傾向があります。自尊感情や人生満足度と正の関連が報告されており、繊細さがあなたの強みとなっています。';
+      insightText = '美的感受性は、HSPの中でもポジティブな心理変数（自尊感情・人生満足度）と正の相関が示されている因子です。あなたの繊細な感覚は、豊かな内面生活や芸術的な喜びにつながっています。この感受性を「弱さ」ではなく「才能」として受け入れることで、より充実した生活を送ることができるでしょう。';
+    } else if (highAES) {
+      typeName = '全体型HSP（美的感受性強め）';
+      typeDesc = '3つの因子全体的に高く、特に美的感受性も持ち合わせています。感覚的な刺激への敏感さとともに、芸術や深い感動を味わう能力も備えています。';
+      insightText = '高いHSP特性を持ちながら、美的感受性もバランスよく備えています。研究では、美的感受性が高いHSP群は「内面世界の充実」に結びつけやすいことが示されています。あなたの繊細さはネガティブな側面だけでなく、深い喜びや感動をもたらす力でもあります。';
+    } else {
+      typeName = '感覚過敏型HSP';
+      typeDesc = '刺激への敏感さが全体的に高く、環境の変化や強い感覚刺激に対してとりわけ反応しやすいタイプです。過負荷になりやすいため、意識的に休息と刺激管理を行うことが大切です。';
+      insightText = '感覚刺激への敏感さが高いタイプです。研究では、低感覚閾と易興奮性の高さは特性不安や心身症状と関連することが示されています。一方で、自分のペースを守り、適切な休息をとることで、その敏感さをうまく活かせるようになります。ストレス管理と自己理解が鍵です。';
+    }
+  } else if (totalPct >= 45) {
+    if (highAES) {
+      typeName = '美的感受性優位型';
+      typeDesc = 'HSP傾向は中程度ですが、特に「美的感受性」が際立っています。芸術や音楽への深い感動、内面の豊かさが特徴です。感覚刺激への過負荷は比較的少なく、感受性の良い部分を活かしやすいタイプです。';
+      insightText = '中程度のHSP傾向の中でも、美的感受性は高めです。これはHSPのポジティブな側面を体現しています。芸術・創造性・繊細な感覚が、あなたの生活に豊かさをもたらしていることでしょう。';
+    } else {
+      typeName = '中程度感受性型';
+      typeDesc = 'HSP傾向は平均的なレベルです。状況によって敏感になることもあれば、そうでないこともあります。特定の環境や状況でHSP的な反応が現れる可能性があります。';
+      insightText = 'HSP傾向は中程度です。全ての人が感受性のスペクトラム上のどこかに位置しています。あなたは状況によって繊細に感じる場面と、そうでない場面の両方があるかもしれません。自分の感じやすい状況を把握しておくと役立ちます。';
+    }
+  } else {
+    typeName = '非HSP型（低感受性）';
+    typeDesc = '感覚処理感受性は比較的低めです。強い刺激にも動じにくく、環境の変化への適応力が高いタイプです。HSPの特性はほとんど当てはまらない可能性があります。';
+    insightText = 'HSPの特性は低めですが、それはあなたが鈍感というわけではありません。刺激への耐性が高く、多くの状況で安定した反応ができるのは、それ自体が一つの強みです。HSPの概念は連続的なスペクトラムであり、全ての人が異なる感受性のパターンを持っています。';
+  }
+
+  // DOM更新
+  document.getElementById('resultTypeName').textContent = typeName;
+  document.getElementById('resultTotalScore').textContent = `${total}点`;
+  document.getElementById('resultDesc').textContent = typeDesc;
+  document.getElementById('resultInsightText').textContent = insightText;
+
+  document.getElementById('score-f1').textContent = `${f1}点 / ${f1max}点`;
+  document.getElementById('score-f2').textContent = `${f2}点 / ${f2max}点`;
+  document.getElementById('score-f3').textContent = `${f3}点 / ${f3max}点`;
+
+  // バーアニメーション
+  setTimeout(() => {
+    document.getElementById('bar-f1').style.width = pct1 + '%';
+    document.getElementById('bar-f2').style.width = pct2 + '%';
+    document.getElementById('bar-f3').style.width = pct3 + '%';
+  }, 300);
+
+  // モーダル用サマリー
+  window._resultData = {
+    typeName, total, totalMax, f1, f2, f3, f1max, f2max, f3max, pct1, pct2, pct3
+  };
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function retryQuiz() {
+  answers = new Array(19).fill(null);
+  currentQ = 0;
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('cover').style.display = 'flex';
+}
+
+// ===== インライン感想フォーム送信 =====
+function submitInlineForm() {
+  // GoogleフォームのアクションURLに変更してください
+  // 例: https://docs.google.com/forms/d/e/XXXXXXXX/formResponse
+  const GOOGLE_FORM_URL = 'YOUR_GOOGLE_FORM_URL_HERE';
+
+  const r = window._resultData;
+  const comment = document.getElementById('f-comment').value;
+
+  const formData = new FormData();
+  formData.append('entry.1417998186', r.typeName);  // タイプ名
+  formData.append('entry.1163532928', r.total);     // 総合スコア
+  formData.append('entry.1848164740', r.f1);          // 低感覚閾スコア
+  formData.append('entry.1216360898', r.f2);               // 易興奮性スコア
+  formData.append('entry.1672218384', r.f3);               // 美的感受性スコア
+  formData.append('entry.1900315869', comment);            // 感想
+
+  if (GOOGLE_FORM_URL !== 'YOUR_GOOGLE_FORM_URL_HERE') {
+    fetch(GOOGLE_FORM_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData
+    }).catch(() => {});
+  }
+
+  // UI更新（送信完了表示）
+  document.getElementById('inlineForm').style.display = 'none';
+  document.getElementById('inlineSubmitted').style.display = 'block';
+}
+</script>
+</body>
+</html>
